@@ -1,6 +1,7 @@
 # Code must be written in Python 3.
 
-# Consume an API endpoint (located at https://atlas.pretio.in/atlas/coding_quiz) which returns a list of offers. Order the offers by the payout and print them into a csv.
+# Consume an API endpoint (located at https://atlas.pretio.in/atlas/coding_quiz) which returns a list of offers. Order the offers by the payout and 
+# print them into a csv.
 
 # 10% of the time the endpoint will spit out a 429. Your code should gracefully handle this error, sleep for 60 seconds and then retry the request. 
 # 10% of the time the endpoint will spit out a 500. Your code should handle the error, print it and exit.
@@ -18,13 +19,15 @@ import json
 import time
 import csv
 
-URL = 'https://atlas.pretio.in/atlas/coding_quiz'
-HEAD = {"Authorization": "Bearer LpNe5bB4CZnvkWaTV9Hv7Cd37JqpcMNF"}
+CONST_URL = 'https://atlas.pretio.in/atlas/coding_quiz'
+CONST_HEAD = {"Authorization": "Bearer LpNe5bB4CZnvkWaTV9Hv7Cd37JqpcMNF"}
 
-# Requets Response from URL
 def main():
+    '''
+    Requests Response from URL
+    '''
     try:
-        response = requests.get(URL,headers=HEAD)
+        response = requests.get(CONST_URL,headers=CONST_HEAD)
         # If the response was successful, no Exception will be raised
         response.raise_for_status()
 
@@ -32,7 +35,7 @@ def main():
         if response.status_code == 429:
             time.sleep(60)
             main()
-        
+            
         elif response.status_code == 500:
             print('HTTP {} error occurred:{}'.format(response.status_code,{http_err}))
             raise SystemExit
@@ -41,9 +44,8 @@ def main():
         print('HTTP error occurred:{}'.format({err}))
     
     else:
-        json_string = response.json()
-        offers = (json_string['rows'])
-        sorted_offers = (sorted(offers, key= lambda x: (float(x['payout']),x['name'])))
+        offers = response.json()['rows']
+        sorted_offers = sorted(offers, key= lambda x: (float(x['payout']),x['name']))
 
         with open("output.csv",'w', newline = '') as file:
             writer = csv.DictWriter(file, fieldnames = sorted_offers[0].keys())
